@@ -59,13 +59,11 @@ export function Hero() {
         <div className="relative animate-fade-up" style={{ animationDelay: "0.2s" }}>
           <div className="absolute -inset-8 rounded-[3rem] bg-gradient-primary opacity-30 blur-3xl" />
           <div className="relative animate-float-slow overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-2 shadow-glow backdrop-blur">
-            <iframe
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3656.471803417692!2d-46.65846692376162!3d-23.59468606493569!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x94ce59d2b063f663%3A0xc5676ab64f437a0f!2sAv.%20Paulista%2C%201000%20-%20Bela%20Vista%2C%20S%C3%A3o%20Paulo%20-%20SP!5e0!3m2!1spt-BR!2sbr!4v1716800000000!5m2!1spt-BR!2sbr"
-              title="Google Maps"
-              className="h-full w-full min-h-[320px] rounded-2xl border-0"
-              allowFullScreen
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
+            <img
+              src={heroGrowth}
+              alt="Crescimento de clientes com Google Meu Negócio"
+              className="h-full w-full rounded-2xl object-cover"
+              loading="eager"
             />
           </div>
           <div className="absolute -left-4 top-10 hidden rounded-2xl border border-white/10 bg-surface-dark/80 p-4 shadow-card backdrop-blur md:block">
