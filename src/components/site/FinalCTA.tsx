@@ -22,7 +22,7 @@ export function FinalCTA() {
             href={WHATSAPP_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="group inline-flex h-16 items-center justify-center gap-3 rounded-full bg-[#25D366] px-10 text-lg font-bold text-white shadow-glow transition-transform hover:scale-105"
+            className="group inline-flex h-16 items-center justify-center gap-3 rounded-full bg-[#128C7E] px-10 text-lg font-bold text-white shadow-glow transition-transform hover:scale-105 hover:bg-[#0e6e63]"
           >
             <MessageCircle className="h-6 w-6" fill="currentColor" />
             Falar Agora no WhatsApp
