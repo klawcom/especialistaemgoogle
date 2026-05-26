@@ -1,5 +1,6 @@
 import { ArrowRight, MessageCircle, Sparkles, Star } from "lucide-react";
 import { WHATSAPP_URL } from "@/lib/site-config";
+import heroGrowth from "@/assets/hero-growth.png";
 
 export function Hero() {
   return (
