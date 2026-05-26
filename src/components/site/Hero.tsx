@@ -30,7 +30,7 @@ export function Hero() {
               href={WHATSAPP_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="group inline-flex h-14 items-center justify-center gap-2 rounded-full bg-[#25D366] px-7 text-base font-semibold text-white shadow-glow transition-transform hover:scale-[1.03]"
+              className="group inline-flex h-14 items-center justify-center gap-2 rounded-full bg-[#128C7E] px-7 text-base font-semibold text-white shadow-glow transition-transform hover:scale-[1.03] hover:bg-[#0e6e63]"
             >
               <MessageCircle className="h-5 w-5" fill="currentColor" />
               Falar no WhatsApp
