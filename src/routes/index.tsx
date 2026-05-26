@@ -1,26 +1,45 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Header } from "@/components/site/Header";
+import { Hero } from "@/components/site/Hero";
+import { Benefits } from "@/components/site/Benefits";
+import { Authority } from "@/components/site/Authority";
+import { Services } from "@/components/site/Services";
+import { Testimonials } from "@/components/site/Testimonials";
+import { FinalCTA } from "@/components/site/FinalCTA";
+import { Footer } from "@/components/site/Footer";
+import { WhatsAppFloat } from "@/components/site/WhatsAppFloat";
 
 export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title: "Especialista em Google Meu Negócio | Apareça no Google Maps" },
+      {
+        name: "description",
+        content:
+          "Otimização profissional de Google Meu Negócio. Mais de 10 anos posicionando empresas no Google Maps e atraindo clientes todos os dias. Fale no WhatsApp.",
+      },
+      { property: "og:title", content: "Especialista em Google Meu Negócio | Apareça no Google Maps" },
+      { property: "og:description", content: "Domine o Google Maps e atraia clientes diariamente com um especialista há +10 anos." },
+      { property: "og:type", content: "website" },
+    ],
+  }),
   component: Index,
 });
 
-// IMPORTANT: Replace this placeholder. For sites with multiple pages (About, Services, Contact, etc.),
-// create separate route files (about.tsx, services.tsx, contact.tsx) — don't put all pages in this file.
-function PlaceholderIndex() {
+function Index() {
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
+    <div className="min-h-screen bg-background">
+      <Header />
+      <main>
+        <Hero />
+        <Benefits />
+        <Authority />
+        <Services />
+        <Testimonials />
+        <FinalCTA />
+      </main>
+      <Footer />
+      <WhatsAppFloat />
     </div>
   );
-}
-
-function Index() {
-  return <PlaceholderIndex />;
 }
