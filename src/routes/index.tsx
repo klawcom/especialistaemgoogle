@@ -5,6 +5,7 @@ import { Benefits } from "@/components/site/Benefits";
 import { Authority } from "@/components/site/Authority";
 import { Services } from "@/components/site/Services";
 import { Testimonials } from "@/components/site/Testimonials";
+import { Portfolio } from "@/components/site/Portfolio";
 import { FinalCTA } from "@/components/site/FinalCTA";
 import { Footer } from "@/components/site/Footer";
 import { WhatsAppFloat } from "@/components/site/WhatsAppFloat";
@@ -35,6 +36,7 @@ function Index() {
         <Benefits />
         <Authority />
         <Services />
+        <Portfolio />
         <Testimonials />
         <FinalCTA />
       </main>
