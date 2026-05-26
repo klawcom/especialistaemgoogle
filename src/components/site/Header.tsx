@@ -10,7 +10,7 @@ export function Header() {
             <MapPin className="h-5 w-5 text-primary-foreground" />
           </span>
           <span className="font-display text-lg font-bold tracking-tight">
-            Rank<span className="text-primary">Local</span>
+            Local <span className="text-primary">Business</span>
           </span>
         </a>
         <nav className="hidden items-center gap-8 text-sm font-medium text-muted-foreground md:flex">
