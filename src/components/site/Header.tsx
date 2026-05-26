@@ -1,4 +1,4 @@
-import { MapPin } from "lucide-react";
+import { MapPin, MessageCircle } from "lucide-react";
 import { WHATSAPP_URL } from "@/lib/site-config";
 
 export function Header() {
@@ -23,9 +23,10 @@ export function Header() {
           href={WHATSAPP_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex h-10 items-center justify-center rounded-full bg-gradient-primary px-5 text-sm font-semibold text-primary-foreground shadow-card transition-transform hover:scale-105"
+          className="inline-flex h-10 items-center justify-center gap-2 rounded-full bg-[#25D366] px-5 text-sm font-semibold text-white shadow-card transition-transform hover:scale-105"
         >
-          Falar no WhatsApp
+          <MessageCircle className="h-4 w-4" fill="currentColor" />
+          WhatsApp
         </a>
       </div>
     </header>
