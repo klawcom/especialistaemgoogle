@@ -1,5 +1,4 @@
 import { ArrowRight, MessageCircle, Sparkles, Star } from "lucide-react";
-import heroImage from "@/assets/hero-maps.jpg";
 import { WHATSAPP_URL } from "@/lib/site-config";
 
 export function Hero() {
@@ -30,9 +29,9 @@ export function Hero() {
               href={WHATSAPP_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="group inline-flex h-14 items-center justify-center gap-2 rounded-full bg-gradient-primary px-7 text-base font-semibold text-primary-foreground shadow-glow transition-transform hover:scale-[1.03]"
+              className="group inline-flex h-14 items-center justify-center gap-2 rounded-full bg-[#25D366] px-7 text-base font-semibold text-white shadow-glow transition-transform hover:scale-[1.03]"
             >
-              <MessageCircle className="h-5 w-5" />
+              <MessageCircle className="h-5 w-5" fill="currentColor" />
               Falar no WhatsApp
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </a>
@@ -59,12 +58,13 @@ export function Hero() {
         <div className="relative animate-fade-up" style={{ animationDelay: "0.2s" }}>
           <div className="absolute -inset-8 rounded-[3rem] bg-gradient-primary opacity-30 blur-3xl" />
           <div className="relative animate-float-slow overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-2 shadow-glow backdrop-blur">
-            <img
-              src={heroImage}
-              alt="Otimização de Google Meu Negócio e posicionamento no Google Maps"
-              className="h-full w-full rounded-2xl object-cover"
-              width={1280}
-              height={1280}
+            <iframe
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3656.471803417692!2d-46.65846692376162!3d-23.59468606493569!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x94ce59d2b063f663%3A0xc5676ab64f437a0f!2sAv.%20Paulista%2C%201000%20-%20Bela%20Vista%2C%20S%C3%A3o%20Paulo%20-%20SP!5e0!3m2!1spt-BR!2sbr!4v1716800000000!5m2!1spt-BR!2sbr"
+              title="Google Maps"
+              className="h-full w-full min-h-[320px] rounded-2xl border-0"
+              allowFullScreen
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
             />
           </div>
           <div className="absolute -left-4 top-10 hidden rounded-2xl border border-white/10 bg-surface-dark/80 p-4 shadow-card backdrop-blur md:block">
