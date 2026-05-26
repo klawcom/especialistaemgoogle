@@ -1,4 +1,4 @@
-import { MapPin } from "lucide-react";
+import { MapPin, MessageCircle } from "lucide-react";
 import { WHATSAPP_URL } from "@/lib/site-config";
 
 export function Header() {
