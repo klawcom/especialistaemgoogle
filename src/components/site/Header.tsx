@@ -16,6 +16,7 @@ export function Header() {
         <nav className="hidden items-center gap-8 text-sm font-medium text-muted-foreground md:flex">
           <a href="#beneficios" className="transition-colors hover:text-foreground">Por que estar no Google</a>
           <a href="#servicos" className="transition-colors hover:text-foreground">Serviços</a>
+          <a href="#portfolio" className="transition-colors hover:text-foreground">Veja na prática</a>
           <a href="#autoridade" className="transition-colors hover:text-foreground">Autoridade</a>
           <a href="#depoimentos" className="transition-colors hover:text-foreground">Resultados</a>
         </nav>
