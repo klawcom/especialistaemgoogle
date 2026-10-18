@@ -22,7 +22,7 @@ export const Route = createFileRoute("/admin")({
 type ModalMode = "add" | "edit" | null;
 
 function AdminPage() {
-  const { user, logout, isAdmin } = useAuth();
+  const { user, logout, isAdmin, isLoading } = useAuth();
   const { clients, addClient, updateClient, deleteClient } = useClients();
   const navigate = useNavigate();
 
@@ -42,12 +42,21 @@ function AdminPage() {
   const [formNotes, setFormNotes] = useState("");
 
   useEffect(() => {
+    if (isLoading) return;
     if (!user) {
       navigate({ to: "/login" });
     } else if (!isAdmin) {
       navigate({ to: "/dashboard" });
     }
-  }, [user, isAdmin, navigate]);
+  }, [user, isAdmin, isLoading, navigate]);
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary/20 border-t-primary" />
+      </div>
+    );
+  }
 
   if (!user || !isAdmin) return null;
 

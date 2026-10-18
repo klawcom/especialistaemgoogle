@@ -48,9 +48,28 @@ function CadastroPage() {
     const result = await register(name, email, password);
     setLoading(false);
     if (result.success) {
-      navigate({ to: "/dashboard" });
+      const isAdm = email.toLowerCase() === "klaw.com@gmail.com" || result.user?.role === "admin";
+      navigate({ to: isAdm ? "/admin" : "/dashboard" });
     } else {
       setError(result.error || "Erro ao criar conta.");
+    }
+  };
+
+  const handleGoogleRegister = async () => {
+    setLoading(true);
+    const u = await loginWithGoogle();
+    setLoading(false);
+    if (u) {
+      navigate({ to: u.role === "admin" ? "/admin" : "/dashboard" });
+    }
+  };
+
+  const handleMicrosoftRegister = async () => {
+    setLoading(true);
+    const u = await loginWithMicrosoft();
+    setLoading(false);
+    if (u) {
+      navigate({ to: u.role === "admin" ? "/admin" : "/dashboard" });
     }
   };
 
@@ -87,8 +106,9 @@ function CadastroPage() {
               <div className="space-y-3">
                 <button
                   id="register-google"
-                  onClick={loginWithGoogle}
-                  className="flex w-full items-center justify-center gap-3 rounded-xl border border-border bg-background px-4 py-3 text-sm font-semibold text-foreground transition-all hover:bg-accent hover:shadow-card"
+                  type="button"
+                  onClick={handleGoogleRegister}
+                  className="flex w-full items-center justify-center gap-3 rounded-xl border border-border bg-background px-4 py-3 text-sm font-semibold text-foreground transition-all hover:bg-accent hover:shadow-card cursor-pointer"
                 >
                   <svg className="h-5 w-5" viewBox="0 0 24 24">
                     <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4" />
@@ -101,8 +121,9 @@ function CadastroPage() {
 
                 <button
                   id="register-microsoft"
-                  onClick={loginWithMicrosoft}
-                  className="flex w-full items-center justify-center gap-3 rounded-xl border border-border bg-background px-4 py-3 text-sm font-semibold text-foreground transition-all hover:bg-accent hover:shadow-card"
+                  type="button"
+                  onClick={handleMicrosoftRegister}
+                  className="flex w-full items-center justify-center gap-3 rounded-xl border border-border bg-background px-4 py-3 text-sm font-semibold text-foreground transition-all hover:bg-accent hover:shadow-card cursor-pointer"
                 >
                   <svg className="h-5 w-5" viewBox="0 0 21 21">
                     <rect x="1" y="1" width="9" height="9" fill="#F25022" />
