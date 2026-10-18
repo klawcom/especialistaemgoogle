@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MapPin, Mail, Lock, Eye, EyeOff, User, ArrowRight, UserPlus } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { ThemeToggle } from "@/components/site/ThemeToggle";
@@ -25,10 +25,11 @@ function CadastroPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  if (user) {
-    navigate({ to: user.role === "admin" ? "/admin" : "/dashboard" });
-    return null;
-  }
+  useEffect(() => {
+    if (user) {
+      navigate({ to: user.role === "admin" ? "/admin" : "/dashboard" });
+    }
+  }, [user, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

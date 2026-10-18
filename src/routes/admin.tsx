@@ -55,6 +55,62 @@ function AdminDashboardPage() {
   const [formRankingPosition, setFormRankingPosition] = useState<number>(1);
   const [formNotes, setFormNotes] = useState("");
 
+  // Metrics Calculations (Must be called unconditionally before any early return)
+  const metrics = useMemo(() => {
+    const safeClients = clients || [];
+    const total = safeClients.length;
+    const ativos = safeClients.filter((c) => c && c.status === "ativo");
+    const prospectos = safeClients.filter((c) => c && c.status === "prospecto");
+    const inativos = safeClients.filter((c) => c && c.status === "inativo");
+
+    const totalMRR = ativos.reduce((acc, c) => acc + (c.monthlyValue || 0), 0);
+    const pipelineMRR = prospectos.reduce((acc, c) => acc + (c.monthlyValue || 0), 0);
+    const ticketMedio = ativos.length ? Math.round(totalMRR / ativos.length) : 0;
+
+    const totalViews = safeClients.reduce((acc, c) => acc + (c.viewsMonth || 0), 0);
+    const totalActions = safeClients.reduce((acc, c) => acc + (c.actionsMonth || 0), 0);
+    const totalCalls = safeClients.reduce((acc, c) => acc + (c.callsCount || 0), 0);
+    const totalDirections = safeClients.reduce((acc, c) => acc + (c.directionsCount || 0), 0);
+    const totalWebsiteClicks = safeClients.reduce((acc, c) => acc + (c.websiteClicks || 0), 0);
+
+    const topRankedCount = safeClients.filter((c) => (c.rankingPosition || 99) <= 3).length;
+    const avgHealthScore = safeClients.length
+      ? Math.round(safeClients.reduce((acc, c) => acc + (c.profileHealthScore || 80), 0) / safeClients.length)
+      : 90;
+
+    return {
+      total,
+      ativosCount: ativos.length,
+      prospectosCount: prospectos.length,
+      inativosCount: inativos.length,
+      totalMRR,
+      pipelineMRR,
+      ticketMedio,
+      totalViews,
+      totalActions,
+      totalCalls,
+      totalDirections,
+      totalWebsiteClicks,
+      topRankedCount,
+      avgHealthScore,
+      conversionRate: totalViews ? ((totalActions / totalViews) * 100).toFixed(1) : "7.2",
+    };
+  }, [clients]);
+
+  // Client filtering (Must be called unconditionally before any early return)
+  const filteredClients = useMemo(() => {
+    return (clients || []).filter((c) => {
+      const q = (search || "").toLowerCase();
+      const matchesSearch =
+        (c.name || "").toLowerCase().includes(q) ||
+        (c.email || "").toLowerCase().includes(q) ||
+        (c.company || "").toLowerCase().includes(q) ||
+        (c.category || "").toLowerCase().includes(q);
+      const matchesStatus = statusFilter === "all" || c.status === statusFilter;
+      return matchesSearch && matchesStatus;
+    });
+  }, [clients, search, statusFilter]);
+
   const handleAdminQuickAccess = async () => {
     setIsLoggingIn(true);
     try {
@@ -66,6 +122,12 @@ function AdminDashboardPage() {
     }
   };
 
+  const handleLogout = () => {
+    logout();
+    navigate({ to: "/" });
+  };
+
+  // Conditional early returns ONLY AFTER ALL HOOKS
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
@@ -145,65 +207,6 @@ function AdminDashboardPage() {
     );
   }
 
-  const handleLogout = () => {
-    logout();
-    navigate({ to: "/" });
-  };
-
-  // Metrics Calculations
-  const metrics = useMemo(() => {
-    const total = clients.length;
-    const ativos = clients.filter((c) => c.status === "ativo");
-    const prospectos = clients.filter((c) => c.status === "prospecto");
-    const inativos = clients.filter((c) => c.status === "inativo");
-
-    const totalMRR = ativos.reduce((acc, c) => acc + (c.monthlyValue || 0), 0);
-    const pipelineMRR = prospectos.reduce((acc, c) => acc + (c.monthlyValue || 0), 0);
-    const ticketMedio = ativos.length ? Math.round(totalMRR / ativos.length) : 0;
-
-    const totalViews = clients.reduce((acc, c) => acc + (c.viewsMonth || 0), 0);
-    const totalActions = clients.reduce((acc, c) => acc + (c.actionsMonth || 0), 0);
-    const totalCalls = clients.reduce((acc, c) => acc + (c.callsCount || 0), 0);
-    const totalDirections = clients.reduce((acc, c) => acc + (c.directionsCount || 0), 0);
-    const totalWebsiteClicks = clients.reduce((acc, c) => acc + (c.websiteClicks || 0), 0);
-
-    const topRankedCount = clients.filter((c) => (c.rankingPosition || 99) <= 3).length;
-    const avgHealthScore = clients.length
-      ? Math.round(clients.reduce((acc, c) => acc + (c.profileHealthScore || 80), 0) / clients.length)
-      : 90;
-
-    return {
-      total,
-      ativosCount: ativos.length,
-      prospectosCount: prospectos.length,
-      inativosCount: inativos.length,
-      totalMRR,
-      pipelineMRR,
-      ticketMedio,
-      totalViews,
-      totalActions,
-      totalCalls,
-      totalDirections,
-      totalWebsiteClicks,
-      topRankedCount,
-      avgHealthScore,
-      conversionRate: totalViews ? ((totalActions / totalViews) * 100).toFixed(1) : "7.2",
-    };
-  }, [clients]);
-
-  // Client filtering
-  const filteredClients = useMemo(() => {
-    return (clients || []).filter((c) => {
-      const q = (search || "").toLowerCase();
-      const matchesSearch =
-        (c.name || "").toLowerCase().includes(q) ||
-        (c.email || "").toLowerCase().includes(q) ||
-        (c.company || "").toLowerCase().includes(q) ||
-        (c.category || "").toLowerCase().includes(q);
-      const matchesStatus = statusFilter === "all" || c.status === statusFilter;
-      return matchesSearch && matchesStatus;
-    });
-  }, [clients, search, statusFilter]);
 
   // Form Handlers
   const openAddModal = () => {

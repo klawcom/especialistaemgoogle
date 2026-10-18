@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MapPin, Mail, Lock, Eye, EyeOff, ArrowRight, LogIn, ShieldCheck, X, CheckCircle2, User as UserIcon } from "lucide-react";
 import { useAuth, ADMIN_EMAIL } from "@/hooks/use-auth";
 import { ThemeToggle } from "@/components/site/ThemeToggle";
@@ -27,11 +27,12 @@ function LoginPage() {
   const [socialModal, setSocialModal] = useState<"google" | "microsoft" | null>(null);
   const [customSocialEmail, setCustomSocialEmail] = useState("");
 
-  // Redirect if already logged in
-  if (user) {
-    navigate({ to: user.role === "admin" ? "/admin" : "/dashboard" });
-    return null;
-  }
+  // Redirect if already logged in via useEffect
+  useEffect(() => {
+    if (user) {
+      navigate({ to: user.role === "admin" ? "/admin" : "/dashboard" });
+    }
+  }, [user, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
