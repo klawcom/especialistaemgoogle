@@ -1,49 +1,60 @@
-import { Star, Quote } from "lucide-react";
+import { ShieldCheck, Target, MessageSquare, CheckCircle2 } from "lucide-react";
 
-const testimonials = [
-  { name: "Marcelo R.", role: "Restaurante", text: "Depois da otimização começamos a receber contatos diariamente pelo Google. Mudou o jogo da empresa." },
-  { name: "Patrícia L.", role: "Clínica Odontológica", text: "Hoje nossa empresa aparece entre as primeiras posições no Maps. A agenda lota toda semana." },
-  { name: "Eduardo M.", role: "Assistência Técnica", text: "O investimento se pagou rapidamente. Triplicou a quantidade de ligações em menos de 60 dias." },
+const pillars = [
+  {
+    icon: Target,
+    title: "Diagnóstico Estratégico",
+    description: "Análise detalhada do seu perfil atual e dos concorrentes da sua região para identificar as palavras-chave com maior volume de buscas.",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Otimização Completa do Perfil",
+    description: "Configuração profissional de categorias primárias, secundárias, atributos locais, fotos de alta qualidade e catálogo de produtos e serviços.",
+  },
+  {
+    icon: MessageSquare,
+    title: "Atendimento & Suporte Direto",
+    description: "Comunicação transparente e suporte direto com o especialista via WhatsApp para orientações contínuas e envio de relatórios de desempenho.",
+  },
 ];
 
 export function Testimonials() {
   return (
-    <section id="depoimentos" className="relative bg-gradient-subtle py-20 md:py-28">
+    <section id="metodologia" className="relative bg-gradient-subtle py-20 md:py-28">
       <div className="mx-auto max-w-7xl px-4 md:px-8">
         <div className="mx-auto max-w-3xl text-center">
           <span className="inline-block rounded-full bg-accent px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-accent-foreground">
-            Resultados reais
+            Metodologia transparente
           </span>
           <h2 className="mt-5 font-display text-3xl font-extrabold leading-tight md:text-5xl">
-            Empresas que pararam de{" "}
-            <span className="text-gradient-primary">perder clientes</span> para a concorrência.
+            Como garantimos o{" "}
+            <span className="text-gradient-primary">resultado real</span> para o seu negócio.
           </h2>
+          <p className="mt-4 text-base text-muted-foreground">
+            Trabalho estruturado com base nas diretrizes oficiais do Google e nas melhores práticas de SEO Local.
+          </p>
         </div>
 
         <div className="mt-14 grid gap-6 md:grid-cols-3">
-          {testimonials.map((t) => (
-            <div
-              key={t.name}
-              className="relative rounded-2xl border border-border bg-card p-8 shadow-card transition-transform hover:-translate-y-1"
-            >
-              <Quote className="absolute right-6 top-6 h-8 w-8 text-primary/20" />
-              <div className="flex gap-1">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="h-4 w-4 fill-primary text-primary" />
-                ))}
-              </div>
-              <p className="mt-5 text-base leading-relaxed text-foreground">"{t.text}"</p>
-              <div className="mt-6 flex items-center gap-3 border-t border-border pt-5">
-                <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-primary font-display font-bold text-primary-foreground">
-                  {t.name.charAt(0)}
+          {pillars.map((p) => {
+            const Icon = p.icon;
+            return (
+              <div
+                key={p.title}
+                className="relative rounded-3xl border border-border bg-card p-8 shadow-card transition-transform hover:-translate-y-1"
+              >
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-primary text-white shadow-glow mb-6">
+                  <Icon className="h-7 w-7" />
                 </div>
-                <div>
-                  <p className="font-display font-bold">{t.name}</p>
-                  <p className="text-sm text-muted-foreground">{t.role}</p>
+                <h3 className="font-display text-xl font-bold text-foreground">{p.title}</h3>
+                <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{p.description}</p>
+                <div className="mt-6 flex items-center gap-2 text-xs font-bold text-primary">
+                  <CheckCircle2 className="h-4 w-4" />
+                  <span>Prática recomendada Google</span>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>

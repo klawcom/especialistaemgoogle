@@ -1,10 +1,10 @@
-import { Award, Users, Sparkles, Headset } from "lucide-react";
+import { Award, Sparkles, Headset, MapPin } from "lucide-react";
 
 const stats = [
-  { icon: Award, value: "+10", label: "anos de experiência" },
-  { icon: Users, value: "+500", label: "empresas atendidas" },
+  { icon: Award, value: "+10", label: "anos de mercado" },
   { icon: Sparkles, value: "100%", label: "estratégias atualizadas" },
-  { icon: Headset, value: "1:1", label: "atendimento personalizado" },
+  { icon: MapPin, value: "Top 3", label: "foco em posicionamento" },
+  { icon: Headset, value: "1:1", label: "atendimento exclusivo" },
 ];
 
 export function Authority() {

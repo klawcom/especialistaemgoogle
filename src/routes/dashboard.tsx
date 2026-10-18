@@ -1,7 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { MapPin, LogOut, User, FileText, Clock, Star, BarChart3, ArrowRight, MessageCircle } from "lucide-react";
+import { MapPin, LogOut, User, FileText, Clock, Star, BarChart3, ArrowRight, MessageCircle, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
+import { useClients } from "@/hooks/use-clients";
 import { ThemeToggle } from "@/components/site/ThemeToggle";
 import { WHATSAPP_URL } from "@/lib/site-config";
 
@@ -17,6 +18,7 @@ export const Route = createFileRoute("/dashboard")({
 
 function DashboardPage() {
   const { user, logout, isAdmin, isLoading } = useAuth();
+  const { clients } = useClients();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -40,6 +42,17 @@ function DashboardPage() {
     logout();
     navigate({ to: "/" });
   };
+
+  // Find real client data if exists in manager portfolio
+  const clientData = clients.find(
+    (c) => c.email && user.email && c.email.toLowerCase() === user.email.toLowerCase()
+  );
+
+  const views = clientData?.viewsMonth || 0;
+  const actions = clientData?.actionsMonth || 0;
+  const rating = clientData?.rating || 0;
+  const plan = clientData?.plan || "Plano sob consulta";
+  const statusLabel = clientData ? (clientData.status === "ativo" ? "Ativo" : clientData.status === "prospecto" ? "Em Análise" : "Inativo") : "Em Configuração";
 
   return (
     <div className="min-h-screen bg-background">
@@ -67,7 +80,7 @@ function DashboardPage() {
             <button
               id="dashboard-logout"
               onClick={handleLogout}
-              className="flex items-center gap-2 rounded-xl border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+              className="flex items-center gap-2 rounded-xl border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent cursor-pointer"
             >
               <LogOut className="h-4 w-4" />
               <span className="hidden md:inline">Sair</span>
@@ -80,89 +93,121 @@ function DashboardPage() {
         {/* Welcome section */}
         <div className="animate-fade-up">
           <h1 className="font-display text-3xl font-extrabold md:text-4xl">
-            Olá, <span className="text-gradient-primary">{user.name.split(" ")[0]}</span>! 👋
+            Olá, <span className="text-gradient-primary">{(user.name || "Cliente").split(" ")[0]}</span>! 👋
           </h1>
           <p className="mt-2 text-muted-foreground">
-            Acompanhe o progresso da sua presença no Google.
+            Acompanhe o status e as métricas da sua presença no Google.
           </p>
         </div>
 
-        {/* Stats cards */}
+        {/* Real Stats Cards */}
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {[
-            { icon: BarChart3, label: "Visualizações", value: "2.847", change: "+18%" },
-            { icon: User, label: "Interações", value: "456", change: "+24%" },
-            { icon: Star, label: "Avaliações", value: "4.9", change: "+3" },
-            { icon: Clock, label: "Dias ativo", value: "127", change: "" },
+            {
+              icon: BarChart3,
+              label: "Visualizações no Maps",
+              value: views > 0 ? views.toLocaleString("pt-BR") : "0",
+              info: views > 0 ? "Últimos 30 dias" : "Iniciando monitoramento",
+            },
+            {
+              icon: User,
+              label: "Ações de Clientes",
+              value: actions > 0 ? actions.toLocaleString("pt-BR") : "0",
+              info: actions > 0 ? "Ligações e rotas" : "Iniciando monitoramento",
+            },
+            {
+              icon: Star,
+              label: "Avaliação Google",
+              value: rating > 0 ? `${rating.toFixed(1)} ★` : "-",
+              info: rating > 0 ? "Média de avaliações" : "Aguardando sincronização",
+            },
+            {
+              icon: Clock,
+              label: "Status do Contrato",
+              value: statusLabel,
+              info: plan,
+            },
           ].map((stat) => (
             <div
               key={stat.label}
-              className="group rounded-2xl border border-border bg-card p-6 shadow-card transition-all hover:-translate-y-1 hover:shadow-soft"
+              className="group rounded-3xl border border-border bg-card p-6 shadow-card transition-all hover:shadow-soft"
             >
               <div className="flex items-center justify-between">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent">
+                <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-accent">
                   <stat.icon className="h-5 w-5 text-accent-foreground" />
                 </div>
-                {stat.change && (
-                  <span className="rounded-full bg-[#188038]/10 px-2.5 py-1 text-xs font-bold text-[#188038]">
-                    {stat.change}
-                  </span>
-                )}
               </div>
               <p className="mt-4 font-display text-3xl font-extrabold">{stat.value}</p>
-              <p className="mt-1 text-sm text-muted-foreground">{stat.label}</p>
+              <p className="mt-1 text-sm font-bold text-foreground">{stat.label}</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">{stat.info}</p>
             </div>
           ))}
         </div>
 
-        {/* Profile + Actions */}
+        {/* Profile + Services */}
         <div className="mt-8 grid gap-6 lg:grid-cols-3">
           {/* Profile card */}
-          <div className="rounded-2xl border border-border bg-card p-6 shadow-card lg:col-span-1">
+          <div className="rounded-3xl border border-border bg-card p-6 shadow-card lg:col-span-1">
             <h2 className="font-display text-lg font-bold">Meu Perfil</h2>
             <div className="mt-6 flex flex-col items-center text-center">
-              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-primary font-display text-3xl font-bold text-white">
-                {user.name.charAt(0).toUpperCase()}
+              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-primary font-display text-3xl font-bold text-white shadow-glow">
+                {(user.name || "C").charAt(0).toUpperCase()}
               </div>
               <h3 className="mt-4 font-display text-xl font-bold">{user.name}</h3>
               <p className="mt-1 text-sm text-muted-foreground">{user.email}</p>
               <span className="mt-3 inline-flex rounded-full bg-accent px-3 py-1 text-xs font-semibold text-accent-foreground">
-                {user.provider === "google" ? "Google" : user.provider === "microsoft" ? "Microsoft" : "E-mail"}
+                {user.provider === "google" ? "Conta Google" : user.provider === "microsoft" ? "Conta Microsoft" : "E-mail Direto"}
               </span>
             </div>
             <div className="mt-6 space-y-3 border-t border-border pt-6">
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Membro desde</span>
+                <span className="text-muted-foreground">Cadastrado em</span>
                 <span className="font-medium">{new Date(user.createdAt).toLocaleDateString("pt-BR")}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Status</span>
-                <span className="inline-flex items-center gap-1 font-medium text-[#188038]">
-                  <span className="h-2 w-2 rounded-full bg-[#188038]" /> Ativo
+                <span className="text-muted-foreground">Plano</span>
+                <span className="font-semibold text-primary">{plan}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Situação</span>
+                <span className="inline-flex items-center gap-1 font-bold text-emerald-600 dark:text-emerald-400">
+                  <span className="h-2 w-2 rounded-full bg-emerald-500" /> {statusLabel}
                 </span>
               </div>
             </div>
           </div>
 
-          {/* Quick actions */}
+          {/* Quick actions & Support */}
           <div className="space-y-6 lg:col-span-2">
-            <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
-              <h2 className="font-display text-lg font-bold">Seus Serviços</h2>
+            <div className="rounded-3xl border border-border bg-card p-6 shadow-card">
+              <h2 className="font-display text-lg font-bold">Status dos Serviços</h2>
               <div className="mt-4 space-y-3">
                 {[
-                  { name: "Otimização do Perfil", status: "Concluído", color: "text-[#188038] bg-[#188038]/10" },
-                  { name: "SEO Local", status: "Em andamento", color: "text-primary bg-primary/10" },
-                  { name: "Gestão de Avaliações", status: "Em andamento", color: "text-primary bg-primary/10" },
+                  {
+                    name: "Diagnóstico Inicial de SEO Local",
+                    status: clientData ? "Concluído" : "Em análise inicial",
+                    color: "text-emerald-600 dark:text-emerald-400 bg-emerald-500/10",
+                  },
+                  {
+                    name: "Otimização Estratégica no Google Maps",
+                    status: clientData?.status === "ativo" ? "Ativo & Monitorando" : "Configuração pendente",
+                    color: "text-primary bg-primary/10",
+                  },
+                  {
+                    name: "Suporte Direto com o Especialista",
+                    status: "Disponível via WhatsApp",
+                    color: "text-primary bg-primary/10",
+                  },
                 ].map((service) => (
                   <div
                     key={service.name}
-                    className="flex items-center justify-between rounded-xl border border-border bg-background p-4 transition-colors hover:bg-accent/30"
+                    className="flex items-center justify-between rounded-2xl border border-border bg-background p-4 transition-colors"
                   >
                     <div className="flex items-center gap-3">
                       <FileText className="h-5 w-5 text-muted-foreground" />
                       <span className="text-sm font-medium">{service.name}</span>
                     </div>
-                    <span className={`rounded-full px-3 py-1 text-xs font-semibold ${service.color}`}>
+                    <span className={`rounded-full px-3 py-1 text-xs font-bold ${service.color}`}>
                       {service.status}
                     </span>
                   </div>
@@ -170,21 +215,21 @@ function DashboardPage() {
               </div>
             </div>
 
-            {/* CTA */}
-            <div className="overflow-hidden rounded-2xl bg-gradient-primary p-6 shadow-glow md:p-8">
-              <h3 className="font-display text-xl font-bold text-white">Precisa de ajuda?</h3>
-              <p className="mt-2 text-sm text-white/80">
-                Fale diretamente com nosso especialista para tirar dúvidas ou solicitar novos serviços.
+            {/* Direct WhatsApp CTA */}
+            <div className="overflow-hidden rounded-3xl bg-gradient-primary p-6 shadow-glow md:p-8 text-white">
+              <h3 className="font-display text-xl font-bold">Precisa de atendimento ou suporte?</h3>
+              <p className="mt-2 text-sm text-white/80 leading-relaxed">
+                Fale diretamente com seu Especialista em Google pelo WhatsApp para alinhar novas fotos, novidades ou tirar dúvidas.
               </p>
               <a
                 href={WHATSAPP_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group mt-4 inline-flex items-center gap-2 rounded-full bg-[#128C7E] px-6 py-3 text-sm font-bold text-white transition-transform hover:scale-105 hover:bg-[#0e6e63]"
+                className="mt-6 inline-flex items-center gap-2 rounded-2xl bg-white px-6 py-3 text-sm font-bold text-primary shadow-soft transition-all hover:scale-105"
               >
                 <MessageCircle className="h-4 w-4" fill="currentColor" />
-                Falar no WhatsApp
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                Conversar no WhatsApp
+                <ArrowRight className="h-4 w-4" />
               </a>
             </div>
           </div>

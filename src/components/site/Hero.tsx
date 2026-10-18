@@ -52,7 +52,7 @@ export function Hero() {
               <span className="ml-2">5.0 de avaliação</span>
             </div>
             <div className="h-4 w-px bg-border" />
-            <span>Centenas de empresas posicionadas</span>
+            <span>Foco no Top 3 do Google Maps</span>
           </div>
         </div>
 

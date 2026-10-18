@@ -59,7 +59,7 @@ export function Portfolio() {
             <span className="text-gradient-primary">aparecer no Google</span>
           </h2>
           <p className="mt-5 text-lg text-muted-foreground">
-            Veja um exemplo real de como otimizamos o perfil de uma mecânica de motos —
+            Veja uma demonstração prática de como estruturamos o perfil —
             fotos profissionais, avaliações 5 estrelas e destaque máximo no Google Maps.
           </p>
         </div>
@@ -80,7 +80,7 @@ export function Portfolio() {
                       <Star key={i} className="h-4 w-4 fill-[#fbbc04] text-[#fbbc04]" />
                     ))}
                   </div>
-                  <span className="text-muted-foreground">(287 avaliações)</span>
+                  <span className="text-muted-foreground">(Avaliações em destaque)</span>
                   <span className="text-muted-foreground">·</span>
                   <span className="text-muted-foreground">Mecânica de motos</span>
                 </div>
@@ -127,7 +127,7 @@ export function Portfolio() {
                 <Camera className="mr-2 inline h-5 w-5 text-primary" />
                 Fotos do estabelecimento
               </h4>
-              <span className="text-sm text-muted-foreground">+ 124 fotos</span>
+              <span className="text-sm text-muted-foreground">Galeria de demonstração</span>
             </div>
 
             <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
@@ -165,7 +165,7 @@ export function Portfolio() {
                       <Star key={i} className="h-4 w-4 fill-[#fbbc04] text-[#fbbc04]" />
                     ))}
                   </div>
-                  <p className="text-xs text-muted-foreground">Baseado em 287 avaliações</p>
+                  <p className="text-xs text-muted-foreground">Padrão de excelência do perfil</p>
                 </div>
               </div>
             </div>

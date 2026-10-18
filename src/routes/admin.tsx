@@ -75,8 +75,8 @@ function AdminDashboardPage() {
 
     const topRankedCount = safeClients.filter((c) => (c.rankingPosition || 99) <= 3).length;
     const avgHealthScore = safeClients.length
-      ? Math.round(safeClients.reduce((acc, c) => acc + (c.profileHealthScore || 80), 0) / safeClients.length)
-      : 90;
+      ? Math.round(safeClients.reduce((acc, c) => acc + (c.profileHealthScore || 0), 0) / safeClients.length)
+      : 0;
 
     return {
       total,
@@ -93,9 +93,34 @@ function AdminDashboardPage() {
       totalWebsiteClicks,
       topRankedCount,
       avgHealthScore,
-      conversionRate: totalViews ? ((totalActions / totalViews) * 100).toFixed(1) : "7.2",
+      conversionRate: totalViews ? ((totalActions / totalViews) * 100).toFixed(1) : "0.0",
     };
   }, [clients]);
+
+  // Dynamic Action percentages
+  const directionsPercent = metrics.totalActions > 0 ? Math.round((metrics.totalDirections / metrics.totalActions) * 100) : 0;
+  const callsPercent = metrics.totalActions > 0 ? Math.round((metrics.totalCalls / metrics.totalActions) * 100) : 0;
+  const websitePercent = metrics.totalActions > 0 ? Math.round((metrics.totalWebsiteClicks / metrics.totalActions) * 100) : 0;
+
+  // Plan Statistics Breakdown (Unconditional Hook)
+  const planStats = useMemo(() => {
+    const map = new Map<string, { count: number; val: number }>();
+    (clients || []).forEach((c) => {
+      if (c && c.status === "ativo") {
+        const plan = c.plan || "Gestão Mensal VIP";
+        const curr = map.get(plan) || { count: 0, val: 0 };
+        curr.count += 1;
+        curr.val += (c.monthlyValue || 0);
+        map.set(plan, curr);
+      }
+    });
+    return Array.from(map.entries()).map(([name, data]) => ({
+      name,
+      count: data.count,
+      val: data.val,
+      percent: metrics.totalMRR > 0 ? Math.round((data.val / metrics.totalMRR) * 100) : 0,
+    }));
+  }, [clients, metrics.totalMRR]);
 
   // Client filtering (Must be called unconditionally before any early return)
   const filteredClients = useMemo(() => {
@@ -217,7 +242,7 @@ function AdminDashboardPage() {
     setFormCategory("Serviços Locais");
     setFormStatus("ativo");
     setFormPlan("Gestão Mensal VIP");
-    setFormMonthlyValue(1250);
+    setFormMonthlyValue(0);
     setFormRankingPosition(1);
     setFormNotes("");
     setEditingClient(null);
@@ -232,7 +257,7 @@ function AdminDashboardPage() {
     setFormCategory(client.category || "Serviços Locais");
     setFormStatus(client.status);
     setFormPlan(client.plan);
-    setFormMonthlyValue(client.monthlyValue || 1200);
+    setFormMonthlyValue(client.monthlyValue || 0);
     setFormRankingPosition(client.rankingPosition || 1);
     setFormNotes(client.notes || "");
     setEditingClient(client);
@@ -248,7 +273,7 @@ function AdminDashboardPage() {
       category: formCategory,
       status: formStatus,
       plan: formPlan,
-      monthlyValue: Number(formMonthlyValue) || 1200,
+      monthlyValue: Number(formMonthlyValue) || 0,
       rankingPosition: Number(formRankingPosition) || 1,
       notes: formNotes,
     };
@@ -432,22 +457,30 @@ function AdminDashboardPage() {
                     R$ {metrics.totalMRR.toLocaleString("pt-BR")}
                   </p>
                   <div className="mt-2 flex items-center gap-2 text-xs">
-                    <span className="flex items-center font-bold text-emerald-600 dark:text-emerald-400">
-                      <TrendingUp className="mr-0.5 h-3.5 w-3.5" /> +18.4%
+                    {metrics.totalMRR > 0 ? (
+                      <span className="flex items-center font-bold text-emerald-600 dark:text-emerald-400">
+                        <TrendingUp className="mr-0.5 h-3.5 w-3.5" /> Recorrência ativa
+                      </span>
+                    ) : (
+                      <span className="text-muted-foreground">Início da operação</span>
+                    )}
+                    <span className="text-muted-foreground">
+                      {metrics.totalMRR > 0 ? "faturamento mensal" : "sem clientes ativos"}
                     </span>
-                    <span className="text-muted-foreground">vs. mês anterior</span>
                   </div>
                 </div>
                 {/* Meta progress */}
                 <div className="mt-4 pt-3 border-t border-border/60">
                   <div className="flex justify-between text-[11px] text-muted-foreground mb-1">
                     <span>Meta R$ 20.000</span>
-                    <span className="font-semibold text-foreground">{Math.round((metrics.totalMRR / 20000) * 100)}%</span>
+                    <span className="font-semibold text-foreground">
+                      {metrics.totalMRR > 0 ? Math.round((metrics.totalMRR / 20000) * 100) : 0}%
+                    </span>
                   </div>
                   <div className="h-1.5 w-full rounded-full bg-accent overflow-hidden">
                     <div
                       className="h-full rounded-full bg-gradient-primary transition-all duration-1000"
-                      style={{ width: `${Math.min(100, Math.round((metrics.totalMRR / 20000) * 100))}%` }}
+                      style={{ width: `${Math.min(100, metrics.totalMRR > 0 ? Math.round((metrics.totalMRR / 20000) * 100) : 0)}%` }}
                     />
                   </div>
                 </div>
@@ -466,9 +499,13 @@ function AdminDashboardPage() {
                     {metrics.totalViews.toLocaleString("pt-BR")}
                   </p>
                   <div className="mt-2 flex items-center gap-2 text-xs">
-                    <span className="flex items-center font-bold text-emerald-600 dark:text-emerald-400">
-                      <TrendingUp className="mr-0.5 h-3.5 w-3.5" /> +24.1%
-                    </span>
+                    {metrics.totalViews > 0 ? (
+                      <span className="flex items-center font-bold text-emerald-600 dark:text-emerald-400">
+                        <TrendingUp className="mr-0.5 h-3.5 w-3.5" /> Buscas orgânicas
+                      </span>
+                    ) : (
+                      <span className="text-muted-foreground">Aguardando buscas</span>
+                    )}
                     <span className="text-muted-foreground">pesquisas e rotas</span>
                   </div>
                 </div>
@@ -493,9 +530,13 @@ function AdminDashboardPage() {
                     {metrics.totalActions.toLocaleString("pt-BR")}
                   </p>
                   <div className="mt-2 flex items-center gap-2 text-xs">
-                    <span className="flex items-center font-bold text-emerald-600 dark:text-emerald-400">
-                      <TrendingUp className="mr-0.5 h-3.5 w-3.5" /> +15.8%
-                    </span>
+                    {metrics.totalActions > 0 ? (
+                      <span className="flex items-center font-bold text-emerald-600 dark:text-emerald-400">
+                        <TrendingUp className="mr-0.5 h-3.5 w-3.5" /> Interações ativas
+                      </span>
+                    ) : (
+                      <span className="text-muted-foreground">Aguardando interações</span>
+                    )}
                     <span className="text-muted-foreground">conversões reais</span>
                   </div>
                 </div>
@@ -515,12 +556,22 @@ function AdminDashboardPage() {
                 </div>
                 <div className="mt-3">
                   <p className="font-display text-3xl font-extrabold text-foreground">
-                    {metrics.avgHealthScore}<span className="text-lg font-normal text-muted-foreground">/100</span>
+                    {metrics.total > 0 ? (
+                      <>
+                        {metrics.avgHealthScore}<span className="text-lg font-normal text-muted-foreground">/100</span>
+                      </>
+                    ) : (
+                      <span className="text-muted-foreground">0/100</span>
+                    )}
                   </p>
                   <div className="mt-2 flex items-center gap-2 text-xs">
-                    <span className="flex items-center font-bold text-purple-600 dark:text-purple-400">
-                      <Sparkles className="mr-0.5 h-3.5 w-3.5" /> Nível Excelente
-                    </span>
+                    {metrics.total > 0 ? (
+                      <span className="flex items-center font-bold text-purple-600 dark:text-purple-400">
+                        <Sparkles className="mr-0.5 h-3.5 w-3.5" /> Média da carteira
+                      </span>
+                    ) : (
+                      <span className="text-muted-foreground">Cadastre o 1º perfil</span>
+                    )}
                     <span className="text-muted-foreground">• Top 3 no Maps</span>
                   </div>
                 </div>
@@ -540,7 +591,7 @@ function AdminDashboardPage() {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-6 border-b border-border/60">
                   <div>
                     <h3 className="font-display text-lg font-bold">Evolução de Visualizações & Descobertas</h3>
-                    <p className="text-xs text-muted-foreground">Volume de impressões semanais nos perfis do Google Maps</p>
+                    <p className="text-xs text-muted-foreground">Volume de impressões nos perfis do Google Maps</p>
                   </div>
                   <div className="flex items-center gap-3 text-xs">
                     <div className="flex items-center gap-1.5">
@@ -554,79 +605,97 @@ function AdminDashboardPage() {
                   </div>
                 </div>
 
-                {/* SVG Interactive Chart */}
-                <div className="mt-6 h-64 w-full">
-                  <svg className="h-full w-full overflow-visible" viewBox="0 0 600 220" preserveAspectRatio="none">
-                    <defs>
-                      <linearGradient id="primaryGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#1A73E8" stopOpacity="0.4" />
-                        <stop offset="100%" stopColor="#1A73E8" stopOpacity="0.0" />
-                      </linearGradient>
-                      <linearGradient id="emeraldGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#10B981" stopOpacity="0.3" />
-                        <stop offset="100%" stopColor="#10B981" stopOpacity="0.0" />
-                      </linearGradient>
-                    </defs>
+                {metrics.total === 0 ? (
+                  <div className="mt-6 flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-accent/20 p-10 text-center min-h-[220px]">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary shadow-glow mb-3">
+                      <BarChart3 className="h-6 w-6" />
+                    </div>
+                    <h4 className="font-display text-base font-bold text-foreground">
+                      Plataforma Pronta para Lançamento
+                    </h4>
+                    <p className="mt-1.5 max-w-sm text-xs text-muted-foreground leading-relaxed">
+                      Nenhum cliente fictício ativo. Cadastre suas primeiras contas para ativar o gráfico de evolução orgânica e pesquisas do Google Maps.
+                    </p>
+                    <button
+                      onClick={openAddModal}
+                      className="mt-4 flex items-center gap-1.5 rounded-xl bg-gradient-primary px-4 py-2 text-xs font-bold text-white shadow-glow hover:scale-105 transition-all cursor-pointer"
+                    >
+                      <Plus className="h-3.5 w-3.5" />
+                      Cadastrar Primeiro Cliente
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <div className="mt-6 h-64 w-full">
+                      <svg className="h-full w-full overflow-visible" viewBox="0 0 600 220" preserveAspectRatio="none">
+                        <defs>
+                          <linearGradient id="primaryGradient" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#1A73E8" stopOpacity="0.4" />
+                            <stop offset="100%" stopColor="#1A73E8" stopOpacity="0.0" />
+                          </linearGradient>
+                          <linearGradient id="emeraldGradient" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#10B981" stopOpacity="0.3" />
+                            <stop offset="100%" stopColor="#10B981" stopOpacity="0.0" />
+                          </linearGradient>
+                        </defs>
 
-                    {/* Horizontal gridlines */}
-                    {[40, 90, 140, 190].map((y) => (
-                      <line key={y} x1="0" y1={y} x2="600" y2={y} stroke="currentColor" className="text-border/50" strokeDasharray="3 3" />
-                    ))}
+                        {[40, 90, 140, 190].map((y) => (
+                          <line key={y} x1="0" y1={y} x2="600" y2={y} stroke="currentColor" className="text-border/50" strokeDasharray="3 3" />
+                        ))}
 
-                    {/* Area 1: Emerald (Descoberta) */}
-                    <path
-                      d="M 0 170 Q 75 140, 150 150 T 300 110 T 450 70 T 600 50 L 600 210 L 0 210 Z"
-                      fill="url(#emeraldGradient)"
-                    />
-                    <path
-                      d="M 0 170 Q 75 140, 150 150 T 300 110 T 450 70 T 600 50"
-                      fill="none"
-                      stroke="#10B981"
-                      strokeWidth="3"
-                    />
+                        <path
+                          d="M 0 170 Q 75 140, 150 150 T 300 110 T 450 70 T 600 50 L 600 210 L 0 210 Z"
+                          fill="url(#emeraldGradient)"
+                        />
+                        <path
+                          d="M 0 170 Q 75 140, 150 150 T 300 110 T 450 70 T 600 50"
+                          fill="none"
+                          stroke="#10B981"
+                          strokeWidth="3"
+                        />
 
-                    {/* Area 2: Primary (Buscas Diretas) */}
-                    <path
-                      d="M 0 190 Q 75 160, 150 130 T 300 90 T 450 50 T 600 30 L 600 210 L 0 210 Z"
-                      fill="url(#primaryGradient)"
-                    />
-                    <path
-                      d="M 0 190 Q 75 160, 150 130 T 300 90 T 450 50 T 600 30"
-                      fill="none"
-                      stroke="#1A73E8"
-                      strokeWidth="3.5"
-                    />
+                        <path
+                          d="M 0 190 Q 75 160, 150 130 T 300 90 T 450 50 T 600 30 L 600 210 L 0 210 Z"
+                          fill="url(#primaryGradient)"
+                        />
+                        <path
+                          d="M 0 190 Q 75 160, 150 130 T 300 90 T 450 50 T 600 30"
+                          fill="none"
+                          stroke="#1A73E8"
+                          strokeWidth="3.5"
+                        />
 
-                    {/* Interactive points */}
-                    {[
-                      { cx: 0, cy: 190, val: "24k" },
-                      { cx: 150, cy: 130, val: "42k" },
-                      { cx: 300, cy: 90, val: "78k" },
-                      { cx: 450, cy: 50, val: "142k" },
-                      { cx: 600, cy: 30, val: "214k" },
-                    ].map((pt, i) => (
-                      <g key={i} className="cursor-pointer group">
-                        <circle cx={pt.cx} cy={pt.cy} r="5" fill="#1A73E8" stroke="#ffffff" strokeWidth="2" />
-                        <text
-                          x={pt.cx}
-                          y={pt.cy - 12}
-                          textAnchor="middle"
-                          className="fill-foreground font-bold text-[11px]"
-                        >
-                          {pt.val}
-                        </text>
-                      </g>
-                    ))}
-                  </svg>
-                </div>
+                        {[
+                          { cx: 0, cy: 190, val: `${Math.round(metrics.totalViews * 0.1)}` },
+                          { cx: 150, cy: 130, val: `${Math.round(metrics.totalViews * 0.25)}` },
+                          { cx: 300, cy: 90, val: `${Math.round(metrics.totalViews * 0.5)}` },
+                          { cx: 450, cy: 50, val: `${Math.round(metrics.totalViews * 0.8)}` },
+                          { cx: 600, cy: 30, val: `${metrics.totalViews.toLocaleString("pt-BR")}` },
+                        ].map((pt, i) => (
+                          <g key={i} className="cursor-pointer group">
+                            <circle cx={pt.cx} cy={pt.cy} r="5" fill="#1A73E8" stroke="#ffffff" strokeWidth="2" />
+                            <text
+                              x={pt.cx}
+                              y={pt.cy - 12}
+                              textAnchor="middle"
+                              className="fill-foreground font-bold text-[11px]"
+                            >
+                              {pt.val}
+                            </text>
+                          </g>
+                        ))}
+                      </svg>
+                    </div>
 
-                <div className="mt-4 flex justify-between text-xs text-muted-foreground px-2">
-                  <span>Semana 1</span>
-                  <span>Semana 2</span>
-                  <span>Semana 3</span>
-                  <span>Semana 4</span>
-                  <span>Atual (Pico)</span>
-                </div>
+                    <div className="mt-4 flex justify-between text-xs text-muted-foreground px-2">
+                      <span>Semana 1</span>
+                      <span>Semana 2</span>
+                      <span>Semana 3</span>
+                      <span>Semana 4</span>
+                      <span>Atual</span>
+                    </div>
+                  </>
+                )}
               </div>
 
               {/* Actions Breakdown Chart: Ligações, Rotas e Cliques */}
@@ -642,10 +711,10 @@ function AdminDashboardPage() {
                         <span className="flex items-center gap-1.5 font-medium text-foreground">
                           <Navigation className="h-4 w-4 text-emerald-500" /> Solicitações de Rota (GPS)
                         </span>
-                        <span className="font-bold">{metrics.totalDirections.toLocaleString("pt-BR")} (51%)</span>
+                        <span className="font-bold">{metrics.totalDirections.toLocaleString("pt-BR")} ({directionsPercent}%)</span>
                       </div>
                       <div className="h-2 w-full rounded-full bg-accent overflow-hidden">
-                        <div className="h-full rounded-full bg-emerald-500" style={{ width: "51%" }} />
+                        <div className="h-full rounded-full bg-emerald-500 transition-all duration-500" style={{ width: `${directionsPercent}%` }} />
                       </div>
                     </div>
 
@@ -655,10 +724,10 @@ function AdminDashboardPage() {
                         <span className="flex items-center gap-1.5 font-medium text-foreground">
                           <PhoneCall className="h-4 w-4 text-primary" /> Ligações Telefônicas
                         </span>
-                        <span className="font-bold">{metrics.totalCalls.toLocaleString("pt-BR")} (33%)</span>
+                        <span className="font-bold">{metrics.totalCalls.toLocaleString("pt-BR")} ({callsPercent}%)</span>
                       </div>
                       <div className="h-2 w-full rounded-full bg-accent overflow-hidden">
-                        <div className="h-full rounded-full bg-primary" style={{ width: "33%" }} />
+                        <div className="h-full rounded-full bg-primary transition-all duration-500" style={{ width: `${callsPercent}%` }} />
                       </div>
                     </div>
 
@@ -668,10 +737,10 @@ function AdminDashboardPage() {
                         <span className="flex items-center gap-1.5 font-medium text-foreground">
                           <MousePointerClick className="h-4 w-4 text-amber-500" /> Cliques no Website / Menu
                         </span>
-                        <span className="font-bold">{metrics.totalWebsiteClicks.toLocaleString("pt-BR")} (16%)</span>
+                        <span className="font-bold">{metrics.totalWebsiteClicks.toLocaleString("pt-BR")} ({websitePercent}%)</span>
                       </div>
                       <div className="h-2 w-full rounded-full bg-accent overflow-hidden">
-                        <div className="h-full rounded-full bg-amber-500" style={{ width: "16%" }} />
+                        <div className="h-full rounded-full bg-amber-500 transition-all duration-500" style={{ width: `${websitePercent}%` }} />
                       </div>
                     </div>
                   </div>
@@ -682,7 +751,16 @@ function AdminDashboardPage() {
                   <div className="flex items-start gap-2.5">
                     <Sparkles className="h-4 w-4 text-primary shrink-0 mt-0.5" />
                     <p className="text-foreground leading-relaxed">
-                      <strong className="text-primary font-bold">Insight:</strong> Mais de <strong>50% das conversões</strong> são visitas físicas via solicitação de rota no Google Maps.
+                      {metrics.totalActions > 0 ? (
+                        <>
+                          <strong className="text-primary font-bold">Insight:</strong> Mais de{" "}
+                          <strong>{directionsPercent}% das conversões</strong> são visitas físicas via solicitação de rota no Google Maps.
+                        </>
+                      ) : (
+                        <>
+                          <strong className="text-primary font-bold">Pronto para dados reais:</strong> Cadastre seus clientes para acompanhar automaticamente ligações, rotas e cliques no site.
+                        </>
+                      )}
                     </p>
                   </div>
                 </div>
@@ -699,64 +777,47 @@ function AdminDashboardPage() {
                     <h3 className="font-display font-bold">Atenção Prioritária do Gestor</h3>
                   </div>
                   <span className="rounded-full bg-amber-500/10 px-2 py-0.5 text-xs font-bold text-amber-600 dark:text-amber-400">
-                    3 pendências
+                    {metrics.prospectosCount > 0 ? `${metrics.prospectosCount} prospecto(s)` : "Em dia"}
                   </span>
                 </div>
 
                 <div className="mt-4 space-y-3">
-                  <div className="flex items-start justify-between rounded-2xl border border-border bg-background p-3.5 transition-all hover:bg-accent/40">
-                    <div className="flex items-start gap-3">
-                      <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-blue-500/10 text-blue-500">
-                        <MessageSquare className="h-4 w-4" />
-                      </span>
-                      <div>
-                        <p className="text-sm font-bold text-foreground">Responder 4 novas avaliações</p>
-                        <p className="text-xs text-muted-foreground">Restaurante Sabor & Arte e TecFix receberam reviews 5 estrelas</p>
-                      </div>
+                  {clients.length === 0 ? (
+                    <div className="rounded-2xl border border-dashed border-border p-6 text-center">
+                      <CheckCircle2 className="mx-auto h-8 w-8 text-emerald-500 mb-2" />
+                      <p className="text-sm font-semibold text-foreground">Tudo limpo e pronto para o lançamento</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Nenhum alerta pendente. Novos avisos de avaliações e follow-up de clientes aparecerão aqui.
+                      </p>
                     </div>
-                    <button
-                      onClick={() => setActiveTab("clients")}
-                      className="text-xs font-bold text-primary hover:underline"
-                    >
-                      Ver
-                    </button>
-                  </div>
-
-                  <div className="flex items-start justify-between rounded-2xl border border-border bg-background p-3.5 transition-all hover:bg-accent/40">
-                    <div className="flex items-start gap-3">
-                      <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-purple-500/10 text-purple-500">
-                        <Sparkles className="h-4 w-4" />
-                      </span>
-                      <div>
-                        <p className="text-sm font-bold text-foreground">Atualizar fotos de fachada (Post semanal)</p>
-                        <p className="text-xs text-muted-foreground">Iron Fit Academia precisa de fotos da nova área de musculação</p>
+                  ) : (
+                    clients.slice(0, 3).map((c) => (
+                      <div
+                        key={c.id}
+                        className="flex items-start justify-between rounded-2xl border border-border bg-background p-3.5 transition-all hover:bg-accent/40"
+                      >
+                        <div className="flex items-start gap-3">
+                          <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                            <Sparkles className="h-4 w-4" />
+                          </span>
+                          <div>
+                            <p className="text-sm font-bold text-foreground">
+                              {c.status === "prospecto" ? `Follow-up comercial: ${c.company}` : `Monitorar ranking: ${c.company}`}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {c.name} • {c.category || "Serviços Locais"} • Posição Maps #{c.rankingPosition || 1}
+                            </p>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => setActiveTab("clients")}
+                          className="text-xs font-bold text-primary hover:underline cursor-pointer"
+                        >
+                          Ver
+                        </button>
                       </div>
-                    </div>
-                    <button
-                      onClick={() => setActiveTab("clients")}
-                      className="text-xs font-bold text-primary hover:underline"
-                    >
-                      Ver
-                    </button>
-                  </div>
-
-                  <div className="flex items-start justify-between rounded-2xl border border-border bg-background p-3.5 transition-all hover:bg-accent/40">
-                    <div className="flex items-start gap-3">
-                      <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-500">
-                        <Calendar className="h-4 w-4" />
-                      </span>
-                      <div>
-                        <p className="text-sm font-bold text-foreground">Follow-up de Proposta (Prospecto)</p>
-                        <p className="text-xs text-muted-foreground">Beleza Pura Salão aguardando retorno sobre plano trimestral</p>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => setActiveTab("clients")}
-                      className="text-xs font-bold text-primary hover:underline"
-                    >
-                      Ver
-                    </button>
-                  </div>
+                    ))
+                  )}
                 </div>
               </div>
 
@@ -769,41 +830,56 @@ function AdminDashboardPage() {
                   </div>
                   <button
                     onClick={() => setActiveTab("rankings")}
-                    className="text-xs font-bold text-primary hover:underline"
+                    className="text-xs font-bold text-primary hover:underline cursor-pointer"
                   >
                     Ver Rankings
                   </button>
                 </div>
 
                 <div className="mt-4 space-y-3">
-                  {(clients || [])
-                    .filter((c) => c && c.status === "ativo")
-                    .slice(0, 3)
-                    .map((client, idx) => (
-                      <div
-                        key={client.id}
-                        className="flex items-center justify-between rounded-2xl border border-border bg-background p-3.5"
+                  {clients.filter((c) => c && c.status === "ativo").length === 0 ? (
+                    <div className="rounded-2xl border border-dashed border-border p-6 text-center">
+                      <p className="text-sm font-semibold text-foreground">Nenhum cliente ativo no momento</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Cadastre sua primeira empresa para acompanhar as posições conquistadas no Top 3 do Google Maps.
+                      </p>
+                      <button
+                        onClick={openAddModal}
+                        className="mt-3 text-xs font-bold text-primary hover:underline cursor-pointer inline-flex items-center gap-1"
                       >
-                        <div className="flex items-center gap-3">
-                          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-primary font-bold text-white text-sm shadow-glow">
-                            #{client.rankingPosition || idx + 1}
+                        <Plus className="h-3.5 w-3.5" /> Adicionar Primeiro Cliente
+                      </button>
+                    </div>
+                  ) : (
+                    clients
+                      .filter((c) => c && c.status === "ativo")
+                      .slice(0, 3)
+                      .map((client, idx) => (
+                        <div
+                          key={client.id}
+                          className="flex items-center justify-between rounded-2xl border border-border bg-background p-3.5"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-primary font-bold text-white text-sm shadow-glow">
+                              #{client.rankingPosition || idx + 1}
+                            </div>
+                            <div>
+                              <p className="font-bold text-foreground">{client.company || "Empresa"}</p>
+                              <p className="text-xs text-muted-foreground">
+                                {client.category || "Serviços"} • {client.rating || 5.0} ★ ({client.reviewsCount || 0} avaliações)
+                              </p>
+                            </div>
                           </div>
-                          <div>
-                            <p className="text-sm font-bold text-foreground">{client.company || "Empresa"}</p>
-                            <p className="text-xs text-muted-foreground">
-                              {client.category || "Serviços"} • {client.rating || 4.9} ★ ({client.reviewsCount || 100} avaliações)
-                            </p>
-                          </div>
-                        </div>
 
-                        <div className="text-right">
-                          <span className="font-display font-extrabold text-foreground text-sm">
-                            +{(client.viewsMonth || 10000).toLocaleString("pt-BR")}
-                          </span>
-                          <p className="text-[11px] text-muted-foreground">views/mês</p>
+                          <div className="text-right">
+                            <span className="font-display font-extrabold text-foreground text-sm">
+                              {(client.viewsMonth || 0).toLocaleString("pt-BR")}
+                            </span>
+                            <p className="text-[11px] text-muted-foreground">views/mês</p>
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      ))
+                  )}
                 </div>
               </div>
             </div>
@@ -862,8 +938,25 @@ function AdminDashboardPage() {
                   <tbody className="divide-y divide-border">
                     {filteredClients.length === 0 ? (
                       <tr>
-                        <td colSpan={6} className="px-6 py-12 text-center text-muted-foreground">
-                          Nenhum cliente encontrado com os filtros aplicados.
+                        <td colSpan={6} className="px-6 py-16 text-center">
+                          <Users className="mx-auto h-10 w-10 text-muted-foreground/40 mb-3" />
+                          <p className="font-display text-base font-bold text-foreground">
+                            {clients.length === 0 ? "Sua carteira de clientes está zerada" : "Nenhum cliente encontrado com os filtros aplicados."}
+                          </p>
+                          <p className="text-xs text-muted-foreground mt-1 max-w-sm mx-auto">
+                            {clients.length === 0
+                              ? "Nenhum dado fictício ativo. Clique no botão abaixo para cadastrar seu primeiro cliente real."
+                              : "Tente buscar com outro termo ou alterar os filtros de status acima."}
+                          </p>
+                          {clients.length === 0 && (
+                            <button
+                              onClick={openAddModal}
+                              className="mt-4 inline-flex items-center gap-2 rounded-xl bg-gradient-primary px-4 py-2 text-xs font-bold text-white shadow-glow hover:scale-105 transition-all cursor-pointer"
+                            >
+                              <Plus className="h-4 w-4" />
+                              Cadastrar Primeiro Cliente Real
+                            </button>
+                          )}
                         </td>
                       </tr>
                     ) : (
@@ -983,41 +1076,58 @@ function AdminDashboardPage() {
                 </div>
               </div>
 
-              <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {(clients || []).map((client) => (
-                  <div key={client.id} className="rounded-2xl border border-border bg-background p-5 hover:border-primary/40 transition-all">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <p className="font-bold text-foreground">{client.company || "Empresa"}</p>
-                        <p className="text-xs text-muted-foreground">{client.category || "Serviços Locais"}</p>
+              {clients.length === 0 ? (
+                <div className="mt-6 rounded-2xl border border-dashed border-border p-12 text-center">
+                  <Navigation className="mx-auto h-10 w-10 text-muted-foreground/40 mb-3" />
+                  <p className="font-display text-base font-bold text-foreground">Nenhum perfil em monitoramento de ranking</p>
+                  <p className="text-xs text-muted-foreground mt-1 max-w-md mx-auto">
+                    Cadastre seus clientes reais para acompanhar a posição orgânica de cada um no Local Pack do Google Maps.
+                  </p>
+                  <button
+                    onClick={openAddModal}
+                    className="mt-4 inline-flex items-center gap-2 rounded-xl bg-gradient-primary px-4 py-2 text-xs font-bold text-white shadow-glow hover:scale-105 transition-all cursor-pointer"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Cadastrar Cliente Real
+                  </button>
+                </div>
+              ) : (
+                <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {(clients || []).map((client) => (
+                    <div key={client.id} className="rounded-2xl border border-border bg-background p-5 hover:border-primary/40 transition-all">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <p className="font-bold text-foreground">{client.company || "Empresa"}</p>
+                          <p className="text-xs text-muted-foreground">{client.category || "Serviços Locais"}</p>
+                        </div>
+                        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-primary font-bold text-white text-sm shadow-glow">
+                          #{client.rankingPosition || 1}
+                        </div>
                       </div>
-                      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-primary font-bold text-white text-sm shadow-glow">
-                        #{client.rankingPosition || 1}
-                      </div>
-                    </div>
 
-                    <div className="mt-4 grid grid-cols-2 gap-2 text-xs pt-3 border-t border-border">
-                      <div>
-                        <span className="text-muted-foreground block text-[11px]">Avaliação Google</span>
-                        <span className="font-bold text-foreground flex items-center gap-1">
-                          {client.rating || 4.9} <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
-                        </span>
+                      <div className="mt-4 grid grid-cols-2 gap-2 text-xs pt-3 border-t border-border">
+                        <div>
+                          <span className="text-muted-foreground block text-[11px]">Avaliação Google</span>
+                          <span className="font-bold text-foreground flex items-center gap-1">
+                            {client.rating || 5.0} <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground block text-[11px]">Saúde do Perfil</span>
+                          <span className="font-bold text-emerald-600 dark:text-emerald-400">
+                            {client.profileHealthScore || 100}% Excelente
+                          </span>
+                        </div>
                       </div>
-                      <div>
-                        <span className="text-muted-foreground block text-[11px]">Saúde do Perfil</span>
-                        <span className="font-bold text-emerald-600 dark:text-emerald-400">
-                          {client.profileHealthScore || 95}% Excelente
-                        </span>
-                      </div>
-                    </div>
 
-                    <div className="mt-3 rounded-xl bg-accent/50 p-2.5 text-xs text-muted-foreground flex items-center justify-between">
-                      <span>Visualizações 30d:</span>
-                      <strong className="text-foreground">{(client.viewsMonth || 0).toLocaleString("pt-BR")}</strong>
+                      <div className="mt-3 rounded-xl bg-accent/50 p-2.5 text-xs text-muted-foreground flex items-center justify-between">
+                        <span>Visualizações 30d:</span>
+                        <strong className="text-foreground">{(client.viewsMonth || 0).toLocaleString("pt-BR")}</strong>
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -1054,23 +1164,25 @@ function AdminDashboardPage() {
             {/* Breakdown de planos */}
             <div className="rounded-3xl border border-border bg-card p-6 shadow-card">
               <h3 className="font-display text-lg font-bold mb-4">Planos Contratados</h3>
-              <div className="space-y-4">
-                {[
-                  { name: "Gestão Mensal VIP", count: 3, val: 5200, percent: 55 },
-                  { name: "SEO Local Premium", count: 2, val: 2600, percent: 28 },
-                  { name: "Otimização Completa & Setup", count: 2, val: 1830, percent: 17 },
-                ].map((plan) => (
-                  <div key={plan.name}>
-                    <div className="flex justify-between text-sm font-semibold mb-1">
-                      <span>{plan.name} ({plan.count} empresas)</span>
-                      <span>R$ {plan.val.toLocaleString("pt-BR")} ({plan.percent}%)</span>
+              {planStats.length === 0 ? (
+                <div className="rounded-2xl border border-dashed border-border p-8 text-center text-muted-foreground text-xs">
+                  Nenhum plano ativo no momento. Os planos e faturamento serão calculados automaticamente a partir dos clientes reais cadastrados.
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {planStats.map((plan) => (
+                    <div key={plan.name}>
+                      <div className="flex justify-between text-sm font-semibold mb-1">
+                        <span>{plan.name} ({plan.count} {plan.count === 1 ? "empresa" : "empresas"})</span>
+                        <span>R$ {plan.val.toLocaleString("pt-BR")} ({plan.percent}%)</span>
+                      </div>
+                      <div className="h-2 w-full rounded-full bg-accent overflow-hidden">
+                        <div className="h-full rounded-full bg-primary transition-all duration-500" style={{ width: `${plan.percent}%` }} />
+                      </div>
                     </div>
-                    <div className="h-2 w-full rounded-full bg-accent overflow-hidden">
-                      <div className="h-full rounded-full bg-primary" style={{ width: `${plan.percent}%` }} />
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}
