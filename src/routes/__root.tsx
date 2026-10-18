@@ -36,31 +36,54 @@ function NotFoundComponent() {
 }
 
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
-  console.error(error);
+  console.error("Root route error:", error);
   const router = useRouter();
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
-        <h1 className="text-xl font-semibold tracking-tight text-foreground">
+      <div className="max-w-lg text-center rounded-3xl border border-border bg-card p-8 shadow-card">
+        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-destructive/10 text-destructive mb-4">
+          <span className="text-2xl font-bold">!</span>
+        </div>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">
           Esta página não carregou
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Algo deu errado. Tente atualizar a página ou voltar ao início.
+          Ocorreu um imprevisto ao carregar este módulo. Você pode tentar recarregar ou reiniciar a sessão.
         </p>
-        <div className="mt-6 flex flex-wrap justify-center gap-2">
+
+        {error?.message && (
+          <div className="mt-4 rounded-xl bg-destructive/5 p-3 text-left border border-destructive/10">
+            <p className="text-xs font-mono text-destructive break-words">{error.message}</p>
+          </div>
+        )}
+
+        <div className="mt-6 flex flex-wrap justify-center gap-3">
           <button
             onClick={() => {
               router.invalidate();
               reset();
             }}
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            className="inline-flex items-center justify-center rounded-xl bg-primary px-5 py-2.5 text-sm font-bold text-primary-foreground transition-all hover:opacity-90 cursor-pointer"
           >
             Tentar novamente
           </button>
+          <button
+            onClick={() => {
+              try {
+                localStorage.removeItem("clients_data");
+                localStorage.removeItem("clients_data_v2");
+                localStorage.removeItem("current_user");
+              } catch {}
+              window.location.href = "/login";
+            }}
+            className="inline-flex items-center justify-center rounded-xl border border-border bg-background px-4 py-2.5 text-sm font-semibold text-foreground transition-all hover:bg-accent cursor-pointer"
+          >
+            Limpar Sessão & Entrar
+          </button>
           <a
             href="/"
-            className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+            className="inline-flex items-center justify-center rounded-xl border border-border bg-background px-4 py-2.5 text-sm font-semibold text-foreground transition-all hover:bg-accent"
           >
             Ir para o início
           </a>

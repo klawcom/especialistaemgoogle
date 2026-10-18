@@ -226,22 +226,55 @@ const DEMO_CLIENTS: Client[] = [
   },
 ];
 
+function normalizeClient(c: any): Client {
+  return {
+    id: c?.id || generateId(),
+    name: c?.name || "Cliente",
+    email: c?.email || "",
+    phone: c?.phone || "(11) 99999-8888",
+    company: c?.company || "Empresa",
+    category: c?.category || "Serviços",
+    status: c?.status === "ativo" || c?.status === "inativo" || c?.status === "prospecto" ? c.status : "ativo",
+    plan: c?.plan || "Gestão Mensal",
+    notes: c?.notes || "",
+    monthlyValue: typeof c?.monthlyValue === "number" ? c.monthlyValue : 1200,
+    rankingPosition: typeof c?.rankingPosition === "number" ? c.rankingPosition : 1,
+    rating: typeof c?.rating === "number" ? c.rating : 4.9,
+    reviewsCount: typeof c?.reviewsCount === "number" ? c.reviewsCount : 100,
+    viewsMonth: typeof c?.viewsMonth === "number" ? c.viewsMonth : 15000,
+    actionsMonth: typeof c?.actionsMonth === "number" ? c.actionsMonth : 1200,
+    callsCount: typeof c?.callsCount === "number" ? c.callsCount : 400,
+    directionsCount: typeof c?.directionsCount === "number" ? c.directionsCount : 600,
+    websiteClicks: typeof c?.websiteClicks === "number" ? c.websiteClicks : 200,
+    profileHealthScore: typeof c?.profileHealthScore === "number" ? c.profileHealthScore : 92,
+    createdAt: c?.createdAt || new Date().toISOString(),
+    updatedAt: c?.updatedAt || new Date().toISOString(),
+  };
+}
+
 function getStoredClients(): Client[] {
   try {
+    if (typeof window === "undefined") return DEMO_CLIENTS.map(normalizeClient);
     const data = localStorage.getItem("clients_data_v2");
     if (data) {
-      return JSON.parse(data);
+      const parsed = JSON.parse(data);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed.map(normalizeClient);
+      }
     }
-    // Migrate or initialize
     localStorage.setItem("clients_data_v2", JSON.stringify(DEMO_CLIENTS));
-    return DEMO_CLIENTS;
+    return DEMO_CLIENTS.map(normalizeClient);
   } catch {
-    return DEMO_CLIENTS;
+    return DEMO_CLIENTS.map(normalizeClient);
   }
 }
 
 function saveClients(clients: Client[]) {
-  localStorage.setItem("clients_data_v2", JSON.stringify(clients));
+  try {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("clients_data_v2", JSON.stringify(clients));
+    }
+  } catch {}
 }
 
 export function ClientsProvider({ children }: { children: React.ReactNode }) {
