@@ -10,7 +10,7 @@ export function Footer() {
             <MapPin className="h-5 w-5 text-primary-foreground" />
           </span>
           <span className="font-display text-lg font-bold">
-            Local <span className="text-primary">Business</span>
+            Especialista em <span className="text-primary">Google</span>
           </span>
         </div>
 
@@ -27,7 +27,7 @@ export function Footer() {
         </div>
 
         <p className="text-xs text-muted-foreground">
-          © {new Date().getFullYear()} Local Business. Todos os direitos reservados.
+          © {new Date().getFullYear()} Especialista em Google. Todos os direitos reservados.
         </p>
       </div>
     </footer>

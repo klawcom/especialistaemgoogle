@@ -9,18 +9,18 @@ const stats = [
 
 export function Authority() {
   return (
-    <section id="autoridade" className="relative overflow-hidden bg-surface-dark py-20 text-surface-dark-foreground md:py-28">
+    <section id="autoridade" className="relative overflow-hidden bg-gradient-dark py-20 md:py-28">
       <div className="absolute inset-0 bg-radial-glow opacity-60" />
       <div className="relative mx-auto max-w-7xl px-4 md:px-8">
         <div className="mx-auto max-w-3xl text-center">
-          <span className="inline-block rounded-full border border-white/15 bg-white/5 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-primary-glow">
+          <span className="inline-block rounded-full border border-border bg-card/40 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-primary backdrop-blur">
             Autoridade comprovada
           </span>
-          <h2 className="mt-5 font-display text-3xl font-extrabold leading-tight md:text-5xl">
+          <h2 className="mt-5 font-display text-3xl font-extrabold leading-tight text-foreground md:text-5xl">
             Mais de 10 anos ajudando empresas a{" "}
             <span className="text-gradient-primary">crescerem através do Google.</span>
           </h2>
-          <p className="mt-5 text-white/70">
+          <p className="mt-5 text-muted-foreground">
             Resultado real, estratégia atualizada e atendimento próximo do começo ao fim.
           </p>
         </div>
@@ -29,11 +29,11 @@ export function Authority() {
           {stats.map((s) => (
             <div
               key={s.label}
-              className="rounded-2xl border border-white/10 bg-white/[0.04] p-8 text-center backdrop-blur transition-colors hover:bg-white/[0.07]"
+              className="rounded-2xl border border-border bg-card/60 p-8 text-center backdrop-blur transition-colors hover:bg-card/80"
             >
-              <s.icon className="mx-auto h-8 w-8 text-primary-glow" />
-              <p className="mt-4 font-display text-4xl font-extrabold text-white md:text-5xl">{s.value}</p>
-              <p className="mt-2 text-sm uppercase tracking-wider text-white/60">{s.label}</p>
+              <s.icon className="mx-auto h-8 w-8 text-primary" />
+              <p className="mt-4 font-display text-4xl font-extrabold text-foreground md:text-5xl">{s.value}</p>
+              <p className="mt-2 text-sm uppercase tracking-wider text-muted-foreground">{s.label}</p>
             </div>
           ))}
         </div>

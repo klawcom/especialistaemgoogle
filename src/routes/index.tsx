@@ -13,13 +13,13 @@ import { WhatsAppFloat } from "@/components/site/WhatsAppFloat";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Especialista em Google Meu Negócio | Apareça no Google Maps" },
+      { title: "Especialista em Google | Apareça no Google Maps" },
       {
         name: "description",
         content:
           "Otimização profissional de Google Meu Negócio. Mais de 10 anos posicionando empresas no Google Maps e atraindo clientes todos os dias. Fale no WhatsApp.",
       },
-      { property: "og:title", content: "Especialista em Google Meu Negócio | Apareça no Google Maps" },
+      { property: "og:title", content: "Especialista em Google | Apareça no Google Maps" },
       { property: "og:description", content: "Domine o Google Maps e atraia clientes diariamente com um especialista há +10 anos." },
       { property: "og:type", content: "website" },
     ],

@@ -1,7 +1,11 @@
-import { MapPin, MessageCircle } from "lucide-react";
+import { MapPin, MessageCircle, LogIn } from "lucide-react";
 import { WHATSAPP_URL } from "@/lib/site-config";
+import { ThemeToggle } from "@/components/site/ThemeToggle";
+import { useAuth } from "@/hooks/use-auth";
 
 export function Header() {
+  const { user } = useAuth();
+
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border/60 bg-background/80 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 md:px-8">
@@ -10,7 +14,7 @@ export function Header() {
             <MapPin className="h-5 w-5 text-primary-foreground" />
           </span>
           <span className="font-display text-lg font-bold tracking-tight">
-            Local <span className="text-primary">Business</span>
+            Especialista em <span className="text-primary">Google</span>
           </span>
         </a>
         <nav className="hidden items-center gap-8 text-sm font-medium text-muted-foreground md:flex">
@@ -20,15 +24,35 @@ export function Header() {
           <a href="#autoridade" className="transition-colors hover:text-foreground">Autoridade</a>
           <a href="#depoimentos" className="transition-colors hover:text-foreground">Resultados</a>
         </nav>
-        <a
-          href={WHATSAPP_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex h-10 items-center justify-center gap-2 rounded-full bg-[#128C7E] px-5 text-sm font-semibold text-white shadow-card transition-transform hover:scale-105 hover:bg-[#0e6e63]"
-        >
-          <MessageCircle className="h-4 w-4" fill="currentColor" />
-          WhatsApp
-        </a>
+        <div className="flex items-center gap-3">
+          <ThemeToggle />
+          {user ? (
+            <a
+              href={user.role === "admin" ? "/admin" : "/dashboard"}
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-card transition-transform hover:scale-105"
+            >
+              <LogIn className="h-4 w-4" />
+              Meu Painel
+            </a>
+          ) : (
+            <a
+              href="/login"
+              className="hidden md:inline-flex h-10 items-center justify-center gap-2 rounded-full border border-border bg-card px-5 text-sm font-semibold text-foreground shadow-card transition-transform hover:scale-105 hover:bg-accent"
+            >
+              <LogIn className="h-4 w-4" />
+              Entrar
+            </a>
+          )}
+          <a
+            href={WHATSAPP_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex h-10 items-center justify-center gap-2 rounded-full bg-[#128C7E] px-5 text-sm font-semibold text-white shadow-card transition-transform hover:scale-105 hover:bg-[#0e6e63]"
+          >
+            <MessageCircle className="h-4 w-4" fill="currentColor" />
+            WhatsApp
+          </a>
+        </div>
       </div>
     </header>
   );
